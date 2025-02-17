@@ -3,25 +3,25 @@ package chatting.application;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
-import java.io.*;
 import javax.swing.border.*;
 import java.util.*;
 import java.text.*;
+import java.io.*;
 import java.net.*;
 
 /**
  *
  * @author TAC
  */
-public class Server implements ActionListener {
+public class Client implements ActionListener {
 
     JTextField t1;
-    JPanel p2;
+    static JPanel p2;
     static Box vertical = Box.createVerticalBox();
-    static JFrame f = new JFrame();
     static DataOutputStream dout;
+    static JFrame f = new JFrame();
 
-    Server() {
+    Client() {
 
         f.setLayout(null);
 
@@ -40,10 +40,11 @@ public class Server implements ActionListener {
         back.addMouseListener(new MouseAdapter() {
             public void mouseClicked(MouseEvent ae) {
                 System.exit(0);
+
             }
         });
 
-        ImageIcon i3 = new ImageIcon(ClassLoader.getSystemResource("icons/1.png"));
+        ImageIcon i3 = new ImageIcon(ClassLoader.getSystemResource("icons/2.png"));
         Image i4 = i3.getImage().getScaledInstance(50, 50, Image.SCALE_DEFAULT);
         JLabel profile = new JLabel(new ImageIcon(i4));
         profile.setBounds(40, 10, 50, 50);
@@ -67,7 +68,7 @@ public class Server implements ActionListener {
         morevert.setBounds(420, 20, 10, 25);
         p1.add(morevert);
 
-        JLabel name = new JLabel("Ahmed");
+        JLabel name = new JLabel("Ali");
         name.setBounds(110, 15, 100, 18);
         name.setForeground(Color.WHITE);
         name.setFont(new Font("SAN_SERIF", Font.BOLD, 18));
@@ -107,8 +108,8 @@ public class Server implements ActionListener {
         send.setFont(new Font("SAN_SERIF", Font.PLAIN, 16));
         f.add(send);
 
-        f.setSize(450, 700);
-        f.setLocation(200, 50);
+        f.setSize(450, 750);
+        f.setLocation(800, 50);
         f.setUndecorated(true);
         f.getContentPane().setBackground(Color.WHITE);
 
@@ -154,6 +155,7 @@ public class Server implements ActionListener {
     public static JPanel formatLabel(String out) {
         JPanel panel = new JPanel();
         panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+
         panel.setOpaque(false);
 
         // Create a custom JPanel for the message background
@@ -193,27 +195,27 @@ public class Server implements ActionListener {
     }
 
     public static void main(String[] args) {
-        new Server();
-//        System.out.println("server");
+        new Client();
         try {
-            ServerSocket skt = new ServerSocket(6001);
+            Socket s = new Socket("127.0.0.1", 6001);
             while (true) {
-                Socket s = skt.accept();
+
                 DataInputStream din = new DataInputStream(s.getInputStream());
                 dout = new DataOutputStream(s.getOutputStream());
+                try {
+                    p2.setLayout(new BorderLayout());
+                    String msg = din.readUTF();
+                    JPanel panel = formatLabel(msg);
+                    JPanel left = new JPanel(new BorderLayout());
+                    left.add(panel, BorderLayout.LINE_START);
+                    vertical.add(left);
 
-                while (true) {
-                    try {
-                        String msg = din.readUTF();
-                        JPanel panel = formatLabel(msg);
-                        JPanel left = new JPanel(new BorderLayout());
-                        left.add(panel, BorderLayout.LINE_START);
-                        vertical.add(left);
-                        f.validate();
-                    } catch (IOException e) {
-                        System.out.println("Server disconnected.");
-                        break;  // Exit loop when client disconnects
-                    }
+                    vertical.add(Box.createVerticalStrut(15));
+                    p2.add(vertical, BorderLayout.PAGE_START);
+                    f.validate();
+                } catch (IOException e) {
+                    System.out.println("Client disconnected.");
+                    break;  // Exit loop when client disconnects
                 }
             }
         } catch (Exception e) {
